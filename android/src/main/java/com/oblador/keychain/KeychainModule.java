@@ -78,7 +78,9 @@ public class KeychainModule extends ReactContextBaseJavaModule {
     String SERVICE = "service";
     String SECURITY_LEVEL = "securityLevel";
     String RULES = "rules";
-
+    String PROMPT_TITLE="promptTitle";
+    String PROMPT_MESSAGE="promptMessage";
+    String CANCEL_BUTTON_TEXT="cancelButtonText";
     String USERNAME = "username";
     String PASSWORD = "password";
     String STORAGE = "storage";
@@ -116,8 +118,17 @@ public class KeychainModule extends ReactContextBaseJavaModule {
   //region Members
   /** Name-to-instance lookup  map. */
   private final Map<String, CipherStorage> cipherStorageMap = new HashMap<>();
+
   /** Shared preferences storage. */
   private final PrefsStorage prefsStorage;
+  /** Added for display message. */
+  private final Map<String,String> customizedMessagesMap=new HashMap<String, String>(){
+    {
+      customizedMessagesMap.put(Maps.PROMPT_TITLE,"Authentication required");
+      customizedMessagesMap.put(Maps.PROMPT_MESSAGE,"Please use biometric authentication to unlock the app");
+      customizedMessagesMap.put(Maps.CANCEL_BUTTON_TEXT,"Cancel");
+    }
+  };
   //endregion
 
   //region Initialization
@@ -168,6 +179,17 @@ public class KeychainModule extends ReactContextBaseJavaModule {
       Log.e(KEYCHAIN_MODULE, "warming up failed!", ex);
     }
   }
+  private void setCustomizedMessages(@NonNull final ReadableMap options){
+    if (null != options && options.hasKey(Maps.PROMPT_TITLE)) {
+      customizedMessagesMap.put(Maps.PROMPT_TITLE,options.getString(Maps.PROMPT_TITLE));
+    }
+    if (null != options && options.hasKey(Maps.PROMPT_MESSAGE)) {
+      customizedMessagesMap.put(Maps.PROMPT_MESSAGE,options.getString(Maps.PROMPT_MESSAGE));
+    }
+    if (null != options && options.hasKey(Maps.CANCEL_BUTTON_TEXT)) {
+      customizedMessagesMap.put(Maps.CANCEL_BUTTON_TEXT,options.getString(Maps.CANCEL_BUTTON_TEXT));
+    }
+  }
   //endregion
 
   //region Overrides
@@ -206,6 +228,8 @@ public class KeychainModule extends ReactContextBaseJavaModule {
       final CipherStorage storage = getSelectedStorage(options);
 
       throwIfInsufficientLevel(storage, level);
+
+      setCustomizedMessages(options);
 
       final EncryptionResult result = storage.encrypt(alias, username, password, level);
       prefsStorage.storeEncryptedEntry(alias, result);
@@ -272,7 +296,7 @@ public class KeychainModule extends ReactContextBaseJavaModule {
         promise.resolve(false);
         return;
       }
-
+      setCustomizedMessages(options);
       // get the best storage
       final String accessControl = getAccessControlOrDefault(options);
       final boolean useBiometry = getUseBiometry(accessControl);
@@ -831,9 +855,9 @@ public class KeychainModule extends ReactContextBaseJavaModule {
 
       final BiometricPrompt prompt = new BiometricPrompt(activity, executor, this);
       final BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Authentication required")
-        .setNegativeButtonText("Cancel")
-        .setSubtitle("Please use biometric authentication to unlock the app")
+        .setTitle(customizedMessagesMap.get("promptTitle"))
+        .setNegativeButtonText(customizedMessagesMap.get("promptMessage"))
+        .setSubtitle(customizedMessagesMap.get("cancelButtonText"))
         .build();
 
       prompt.authenticate(info);
