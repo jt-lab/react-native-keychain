@@ -122,13 +122,7 @@ public class KeychainModule extends ReactContextBaseJavaModule {
   /** Shared preferences storage. */
   private final PrefsStorage prefsStorage;
   /** Added for display message. */
-  private final Map<String,String> customizedMessagesMap=new HashMap<String, String>(){
-    {
-      customizedMessagesMap.put(Maps.PROMPT_TITLE,"Authentication required");
-      customizedMessagesMap.put(Maps.PROMPT_MESSAGE,"Please use biometric authentication to unlock the app");
-      customizedMessagesMap.put(Maps.CANCEL_BUTTON_TEXT,"Cancel");
-    }
-  };
+  private final Map<String,String> customizedMessagesMap=new HashMap<>();
   //endregion
 
   //region Initialization
@@ -855,9 +849,9 @@ public class KeychainModule extends ReactContextBaseJavaModule {
 
       final BiometricPrompt prompt = new BiometricPrompt(activity, executor, this);
       final BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
-        .setTitle(customizedMessagesMap.get("promptTitle"))
-        .setNegativeButtonText(customizedMessagesMap.get("promptMessage"))
-        .setSubtitle(customizedMessagesMap.get("cancelButtonText"))
+        .setTitle(customizedMessagesMap.getOrDefault(Maps.PROMPT_TITLE,"Authentication required"))
+        .setNegativeButtonText(customizedMessagesMap.getOrDefault(Maps.PROMPT_MESSAGE,"Please use biometric authentication to unlock the app"))
+        .setSubtitle(customizedMessagesMap.getOrDefault(Maps.CANCEL_BUTTON_TEXT,"Cancel"))
         .build();
 
       prompt.authenticate(info);
