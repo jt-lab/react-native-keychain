@@ -850,8 +850,8 @@ public class KeychainModule extends ReactContextBaseJavaModule {
       final BiometricPrompt prompt = new BiometricPrompt(activity, executor, this);
       final BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
         .setTitle(customizedMessagesMap.getOrDefault(Maps.PROMPT_TITLE,"Authentication required"))
-        .setNegativeButtonText(customizedMessagesMap.getOrDefault(Maps.PROMPT_MESSAGE,"Please use biometric authentication to unlock the app"))
-        .setSubtitle(customizedMessagesMap.getOrDefault(Maps.CANCEL_BUTTON_TEXT,"Cancel"))
+        .setSubtitle(customizedMessagesMap.getOrDefault(Maps.PROMPT_MESSAGE,"Please use biometric authentication to unlock the app"))
+        .setNegativeButtonText(customizedMessagesMap.getOrDefault(Maps.CANCEL_BUTTON_TEXT,"Cancel"))
         .build();
 
       prompt.authenticate(info);
